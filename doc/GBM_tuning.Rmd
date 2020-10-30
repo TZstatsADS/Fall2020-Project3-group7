@@ -1,0 +1,104 @@
+---
+title: "GBM_tuning"
+author: '-'
+date: "2020/10/30"
+output: html_document
+---
+
+```{r}
+# Model's structure is like following:
+train_GBM <- function(features){
+  ### Train a classfication model using processed features from training images
+  
+  ### Input:  a df containing features and labels
+  ### Output: trained model
+  
+  ### load libraries
+  library(gbm)
+  
+  ### set seed
+  set.seed(2020)
+  seed <- .Random.seed
+  
+  ### Train with gbm
+  
+  model <- gbm(label~., data = features,n.trees =300, 
+               distribution = "bernoulli",
+               shrinkage = 0.01, 
+               interaction.depth = 3)
+  ###parameters are all defalut:
+               #distribution = "bernoulli"
+               #n.trees = 100, 
+               #shrinkage = 0.1, 
+               #interaction.depth = 1,
+  
+  return(model)
+}
+
+
+```
+
+```{r}
+## test on a small dataset
+
+library(gbm)
+datatry = dat_train[1:100,]
+e<-gbm(label~., data = datatry,
+               n.trees =300, 
+               distribution = "bernoulli",
+               shrinkage = 0.01, 
+               interaction.depth = 3,
+               n.minobsinnode = 10)
+
+result = predict.gbm(e,newdata = datatry, n.trees = 300, type="response")
+result
+```
+
+```{r}
+datatry$label = as.factor(datatry$label)
+getModelInfo()$gbm$parameters
+library(parallel)
+library(doMC)
+registerDoMC(cores = 20)
+# Max shrinkage for gbm
+nl = nrow(dat_train)
+max(0.01, 0.1*min(1, nl/10000))
+# in this case, max shrinkage is 0.024
+
+# Max Value for interaction.depth
+floor(sqrt(NCOL(dat_train)))
+# in this case, max interaction.depth is 77
+
+gbmGrid <-  expand.grid(interaction.depth = c(1, 2, 3),
+                    n.trees = c(100, 150, 200, 250, 300), 
+                    shrinkage =  c(0.01, 0.024, 0.1),
+                    n.minobsinnode = 10) 
+
+fitControl <- trainControl(method = "repeatedcv",
+                       repeats = 3,
+                       preProcOptions = list(thresh = 0.95),
+                       ## Estimate class probabilities
+                       classProbs = T,
+                       ## Evaluate performance using
+                       ## the following function
+                       summaryFunction = twoClassSummary)
+
+# Method + Date + distribution
+set.seed(2020)
+system.time(GBM <- train(label ~ ., data = datatry,
+            distribution = "bernoulli",
+            method = "gbm", bag.fraction = 0.5,
+            nTrain = round(nrow(datatry) *.80),
+            #trControl = fitControl,
+            verbose = TRUE,
+            tuneGrid = gbmGrid
+            ## Specify which metric to optimize
+            ))
+```
+We understand that higher shrinkage may cause overfitting, theoretically the shrinkage should be less than 0.024 to avoid overfitting. However, smaller shrinkage needs more trees, which largely increases the running time.
+
+By trading off between running time and performance, we choose to use:
+n.trees = 200,
+shrinkage = 0.1
+interaction.depth = 3
+cv. fold = 3

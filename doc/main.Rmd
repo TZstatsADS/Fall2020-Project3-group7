@@ -59,6 +59,7 @@ library(OpenImageR)
 ### Step 0 set work directories
 ```{r wkdir, eval=FALSE}
 set.seed(2020)
+#setwd("~/GitHub/Fall2020-Project3-group_7/doc")
 setwd("C:/Users/60171/Desktop/project3_gbm/doc")
 ```
 
@@ -102,21 +103,13 @@ train_idx <- sample(info$Index, n_train, replace = F)
 test_idx <- setdiff(info$Index, train_idx)
 ```
 
-If you choose to extract features from images, such as using Gabor filter, R memory will exhaust all images are read together. The solution is to repeat reading a smaller batch(e.g 100) and process them. 
-```{r}
-n_files <- length(list.files(train_image_dir))
-
-image_list <- list()
-for(i in 1:100){
-   image_list[[i]] <- readImage(paste0(train_image_dir, sprintf("%04d", i), ".jpg"))
-}
-```
-
 Fiducial points are stored in matlab format. In this step, we read them and store them in a list.
 ```{r read fiducial points}
 #function to read fiducial points
 #input: index
 #output: matrix of fiducial points corresponding to the index
+n_files <- length(list.files(train_image_dir))
+
 readMat.matrix <- function(index){
      return(round(readMat(paste0(train_pt_dir, sprintf("%04d", index), ".mat"))[[1]],0))
 }
@@ -186,6 +179,7 @@ The defalut parameters are:
 + n.trees = 100, 
 + shrinkage = 0.1, 
 + interaction.depth = 1,
++ cv. fold = 3
 
 ```{r train_GBM_base}
 # load model built-in from ib
@@ -204,10 +198,10 @@ fit_train_GBM_base
 ###### Step 4.1(b): Test GBM with default setting of parameters
 
 Calculate the training error of default GBM model
-```{r train_err_gbm}
+```{r train_err_gbm, fig.show='hide'}
 ### load models built
-source("../lib/test_GBM_base.R")
-pred_train_GBM_base <- round(test_GBM_base(fit_train_GBM_base, features = dat_train),digit=0)
+source("../lib/test_GBM.R")
+pred_train_GBM_base <- round(test_GBM(fit_train_GBM_base, features = dat_train),digit=0)
 accu_train_GBM_base <- mean(pred_train_GBM_base  == dat_train$label)
 cat("The trainig accuracy of model: GBM", "is", accu_train_GBM_base *100, "%.\n")
 ```
@@ -215,22 +209,70 @@ cat("The trainig accuracy of model: GBM", "is", accu_train_GBM_base *100, "%.\n"
 Then, we predicted the test data and evaluated the performance of default GBM model.
 ```{r test_gbm}
 ### load models built
-source("../lib/test_GBM_base.R")
+source("../lib/test_GBM.R")
 ### predict test data
 tm_test_GBM_base=NA
 if(run.test){
   load(file="../output/train_GBM_base.RData")
-  tm_test_GBM_base <- system.time(pred <- test_GBM_base(fit_train_GBM_base, dat_test))
+  tm_test_GBM_base <- system.time(pred <- test_GBM(fit_train_GBM_base, dat_test))
 }
-```
-
-Evaluation on GBM model
-```{r}
 pred_test_GBM_base = round(test_GBM_base(fit_train_GBM_base, dat_test),digit=0)
 accu_test_GBM_base <- mean(dat_test$label == pred_test_GBM_base)
 cat("The accuracy of model: gradient boosting machine", "is", accu_test_GBM_base*100, "%.\n")
 cat("Time for training model GBM_baseline = ", tm_train_GBM_base[1], "s \n")
 cat("Time for testing model GBM_baseline = ",tm_test_GBM_base[1], "s \n")
+```
+
+##### Step 4.2: Improved Baseline Model - Gradient Boosting Machine(GBM) with tuning parameters
+###### Step 4.2(a): Train GBM with with tuning parameters
+By trading off between running time and performance, we choose to use following parameters:
+
++ distribution = "bernoulli" (if the response has only 2 unique values, bernoulli is assumed)
++ n.trees = 200,
++ shrinkage = 0.1
++ interaction.depth = 3
++ cv. fold = 3
+
+```{r train_GBM_improved}
+# load model built-in from lib
+source("../lib/train_GBM_improved.R") 
+
+# fit train data
+tm_train_GBM_improved = NA
+tm_train_GBM_improved <- system.time(fit_train_GBM_improved <- train_GBM_improved(features= dat_train))
+save(fit_train_GBM_improved , file="../output/train_GBM_improved.RData")
+```
+The result of improved after tuning parameters
+
+```{r}
+fit_train_GBM_improved
+```
+
+###### Step 4.2(b): Test GBM with with tuning parameters
+Calculate the training error of improved GBM model
+```{r train_err_gbm_improved, fig.show='hide'}
+### load models built
+source("../lib/test_GBM.R")
+pred_train_GBM_improved <- round(test_GBM(fit_train_GBM_improved, features = dat_train),digit=0)
+accu_train_GBM_improved <- mean(pred_train_GBM_improved  == dat_train$label)
+cat("The trainig accuracy of model: Improved GBM", "is", accu_train_GBM_improved *100, "%.\n")
+```
+
+Then, we predicted the test data and evaluated the performance of default GBM model.
+```{r test_gbm_impoved, fig.show='hide'}
+### load models built
+source("../lib/test_GBM.R")
+### predict test data
+tm_test_GBM_improved=NA
+if(run.test){
+  load(file="../output/train_GBM_improved.RData")
+  tm_test_GBM_improved <- system.time(pred <- test_GBM(fit_train_GBM_improved, dat_test))
+}
+pred_test_GBM_improved = round(test_GBM(fit_train_GBM_improved, dat_test),digit=0)
+accu_test_GBM_improved <- mean(dat_test$label == pred_test_GBM_improved)
+cat("The accuracy of model: Improved GBM", "is", accu_test_GBM_improved*100, "%.\n")
+cat("Time for training model GBM_improved = ", tm_train_GBM_improved[1], "s \n")
+cat("Time for testing model GBM_improved = ",tm_test_GBM_improved[1], "s \n")
 ```
 
 

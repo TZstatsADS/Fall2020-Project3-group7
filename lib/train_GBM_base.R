@@ -17,7 +17,12 @@ train_GBM_base <- function(features){
   
   ### Train with gbm
   
-  model <- gbm(label~., data = features,n.trees =100, distribution = "bernoulli",shrinkage = 0.01)
+  model <- gbm(label~., data = features,n.trees =100,
+               distribution = "bernoulli",
+               shrinkage = 0.1,
+               interaction.depth = 1,
+               cv.folds = 3)
+  
   ###parameters are all defalut:
                #distribution = "bernoulli"
                #n.trees = 100, 
@@ -33,6 +38,6 @@ train_GBM_base <- function(features){
 #library(gbm)
 #data_try = dat_train[1:100,]
 #data_try$label <- as.numeric(data_try$label)-1
-#d<-gbm(label~. , data = data_try, n.trees =100, ,shrinkage = 0.01)
+#d<-gbm(label~. , data = data_try, n.trees =100, ,shrinkage = 0.1)
 
 #predict.gbm(d,newdata = data_try, n.trees = 100, type="response")
