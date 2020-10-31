@@ -54,12 +54,13 @@ library(caret)
 library(glmnet)
 library(WeightedROC)
 library(OpenImageR)
+
 ```
 
 ### Step 0 set work directories
 ```{r wkdir, eval=FALSE}
 set.seed(2020)
-#setwd("~/GitHub/Fall2020-Project3-group_7/doc")
+#\setwd("~/GitHub/Fall2020-Project3-group_7/doc")
 #setwd("./")
 ```
 
@@ -116,6 +117,7 @@ readMat.matrix <- function(index){
 
 #load fiducial points
 fiducial_pt_list <- lapply(1:n_files, readMat.matrix)
+
 save(fiducial_pt_list, file="../output/fiducial_pt_list.RData")
 ```
 
@@ -279,6 +281,38 @@ cat("Time for testing model GBM_improved = ",tm_test_GBM_improved[1], "s \n")
 ### Step 5: Other advanced models
 
 #### Step 5.1: SVM
+
+```{r SVM}
+source("../lib/svm.R")
+
+# tuning random forest
+opt.svm <- svm_tune(dat_train)
+
+# training rf
+tm_svmTrain <- system.time(
+  svm_fit <- svm_train(dat_train,
+                     mtry = opt.svm[,1])
+)
+save(svm_fit, file = "../output/svm_fit.RData")
+
+# testing rf
+tm_svmTest <- system.time(
+  svm_test_pred <- svm_test(model = svm_fit,
+                          testdf = dat_test)
+)
+accu <- mean(svm_test_pred == dat_test$label)
+
+# auc rf
+library(AUC)
+ac <- roc(factor(svm_test_pred), factor(dat_test$label))
+auc <- auc(ac)
+
+cat("Time for training model Random Forest = ", tm_svmTrain[1], "s \n")
+cat("Time for testing model Random Forest = ",tm_svmTest[1], "s \n")
+cat("The accuracy of Random Forest model is", accu*100, "%.\n")
+cat("The AUC of Random Forest model is", auc, ".\n")
+
+```
 
 #### Step 5.2: Random Forest
 
