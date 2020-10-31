@@ -60,13 +60,13 @@ library(OpenImageR)
 ```{r wkdir, eval=FALSE}
 set.seed(2020)
 #setwd("~/GitHub/Fall2020-Project3-group_7/doc")
-setwd("C:/Users/60171/Desktop/project3_gbm/doc")
+#setwd("./")
 ```
 
 Provide directories for training images. Training images and Training fiducial points will be in different subfolders. 
 ```{r}
 
-train_dir <- "C:/Users/60171/Desktop/train_set/" # This will be modified for different data sets.
+train_dir <- "../data/train_set/" # This will be modified for different data sets.
 train_image_dir <- paste(train_dir, "images/", sep="")
 train_pt_dir <- paste(train_dir,  "points/", sep="")
 train_label_path <- paste(train_dir, "label.csv", sep="") 
@@ -216,7 +216,7 @@ if(run.test){
   load(file="../output/train_GBM_base.RData")
   tm_test_GBM_base <- system.time(pred <- test_GBM(fit_train_GBM_base, dat_test))
 }
-pred_test_GBM_base = round(test_GBM_base(fit_train_GBM_base, dat_test),digit=0)
+pred_test_GBM_base = round(test_GBM(fit_train_GBM_base, dat_test),digit=0)
 accu_test_GBM_base <- mean(dat_test$label == pred_test_GBM_base)
 cat("The accuracy of model: gradient boosting machine", "is", accu_test_GBM_base*100, "%.\n")
 cat("Time for training model GBM_baseline = ", tm_train_GBM_base[1], "s \n")
@@ -281,6 +281,37 @@ cat("Time for testing model GBM_improved = ",tm_test_GBM_improved[1], "s \n")
 #### Step 5.1: SVM
 
 #### Step 5.2: Random Forest
+
+```{r Random Forest}
+source("../lib/rand_f.R")
+
+# tuning random forest
+opt.rf <- rf_tune(dat_train)
+
+# training rf
+tm_rfTrain <- system.time(
+  rf_fit <- rf_train(dat_train,
+                     mtry = opt.rf[,1])
+)
+save(rf_fit, file = "../output/rf_fit.RData")
+
+# testing rf
+tm_rfTest <- system.time(
+  rf_test_pred <- rf_test(model = rf_fit,
+                          testdf = dat_test)
+)
+accu <- mean(rf_test_pred == dat_test$label)
+
+# auc rf
+library(AUC)
+ac <- roc(factor(rf_test_pred), factor(dat_test$label))
+auc <- auc(ac)
+
+cat("Time for training model Random Forest = ", tm_rfTrain[1], "s \n")
+cat("Time for testing model Random Forest = ",tm_rfTest[1], "s \n")
+cat("The accuracy of Random Forest model is", accu*100, "%.\n")
+cat("The AUC of Random Forest model is", auc, ".\n")
+```
 
 #### Step 5.3: CNN
 
