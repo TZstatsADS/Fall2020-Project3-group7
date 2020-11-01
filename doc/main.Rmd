@@ -45,6 +45,18 @@ if(!require("WeightedROC")){
   install.packages("WeightedROC")
 }
 
+if(!require("AUC")){
+  install.packages("AUC")
+}
+
+if(!require("e1071")){
+  install.packages("e1071")
+}
+
+if(!require("randomForest")){
+  install.packages("randomForest")
+}
+
 library(R.matlab)
 library(readxl)
 library(dplyr)
@@ -54,6 +66,9 @@ library(caret)
 library(glmnet)
 library(WeightedROC)
 library(OpenImageR)
+library(AUC)
+library(e1071)
+library(randomForest)
 
 ```
 
@@ -286,12 +301,11 @@ cat("Time for testing model GBM_improved = ",tm_test_GBM_improved[1], "s \n")
 source("../lib/svm.R")
 
 # tuning random forest
-opt.svm <- svm_tune(dat_train)
+opt.svm <- svm_tune(dat_train, dat_test)
 
 # training rf
 tm_svmTrain <- system.time(
-  svm_fit <- svm_train(dat_train,
-                     mtry = opt.svm[,1])
+  svm_fit <- svm_train(dat_train)
 )
 save(svm_fit, file = "../output/svm_fit.RData")
 
@@ -303,14 +317,14 @@ tm_svmTest <- system.time(
 accu <- mean(svm_test_pred == dat_test$label)
 
 # auc rf
-library(AUC)
+
 ac <- roc(factor(svm_test_pred), factor(dat_test$label))
 auc <- auc(ac)
 
-cat("Time for training model Random Forest = ", tm_svmTrain[1], "s \n")
-cat("Time for testing model Random Forest = ",tm_svmTest[1], "s \n")
-cat("The accuracy of Random Forest model is", accu*100, "%.\n")
-cat("The AUC of Random Forest model is", auc, ".\n")
+cat("Time for training model SVM = ", tm_svmTrain[1], "s \n")
+cat("Time for testing model SVM = ",tm_svmTest[1], "s \n")
+cat("The accuracy of SVM is", accu*100, "%.\n")
+cat("The AUC of SVM model is", auc, ".\n")
 
 ```
 
@@ -337,7 +351,6 @@ tm_rfTest <- system.time(
 accu <- mean(rf_test_pred == dat_test$label)
 
 # auc rf
-library(AUC)
 ac <- roc(factor(rf_test_pred), factor(dat_test$label))
 auc <- auc(ac)
 
