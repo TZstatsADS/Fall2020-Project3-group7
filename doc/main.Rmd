@@ -400,12 +400,24 @@ dtest <- xgb.DMatrix(data = new_ts,label=ts_labels)
 
 
 ###### Step 5.3(b): Train XGB with with tuning parameters
+
 ```{r message=False}
-# train and test model
-params <- list(booster = "gbtree", objective = "binary:logistic", eta=0.1, gamma=0.1, max_depth=4, min_child_weight=1, subsample=1, colsample_bytree=1)
-xgb_time<-system.time(xgb1 <- xgb.train (params = params, data = dtrain, nrounds = 50, watchlist = list(train=dtrain, val=dtest), print.every.n = 10, early.stop.round = 10, maximize = F , eval_metric = "error"))
-cat('The accuracy of xgb model is: ', (1-xgb1$best_score)*100, '% \n')
-cat('The time of training and testing xgb model is: ', xgb_time[1], 's \n')
+xgb_time<-system.time(xgb1 <- xgboost (data = dtrain, booster = "gbtree", objective = "binary:logistic", eta=0.1, gamma=0.1, max_depth=4, min_child_weight=1, subsample=1, colsample_bytree=1, nrounds = 50))
+```
+
+```{r}
+xgb_test_time<-system.time(xgb_pred <- predict(xgb1, dtest))
+prediction <- as.numeric(pred > 0.5)
+err <- mean(as.numeric(pred > 0.5) != dat_test$label)
+ac <- roc(factor(xgb_pred), factor(dat_test$label))
+auc <- auc(ac)
+```
+
+```{r}
+cat('The accuracy of xgb model is: ', (1-err)*100, '% \n')
+cat('The time of training xgb model is: ', xgb_time[1], 's \n')
+cat('The time of testing xgb model is: ', xgb_test_time[1], 's \n')
+cat("The AUC of Random Forest model is", auc, ".\n")
 ```
 
 ### Step 6:Conclusion
