@@ -347,7 +347,30 @@ cat("The accuracy of Random Forest model is", accu*100, "%.\n")
 cat("The AUC of Random Forest model is", auc, ".\n")
 ```
 
-#### Step 5.3: CNN
+#### Step 5.3: XGB
+
+```{r}
+# Construct train matrix and test matrix
+labels <- dat_train$label
+ts_labels <- dat_test$label
+new_tr <- model.matrix(~.+0,data = dat_train[,-which(names(dat_train) %in% c("label"))]) 
+new_ts <- model.matrix(~.+0,data = dat_test[,-which(names(dat_test) %in% c("label"))])
+labels <- as.numeric(labels)-1
+ts_labels <- as.numeric(ts_labels)-1
+dtrain <- xgb.DMatrix(data = new_tr,label = labels) 
+dtest <- xgb.DMatrix(data = new_ts,label=ts_labels)
+```
+
+```{r message=False}
+# train and test model
+params <- list(booster = "gbtree", objective = "binary:logistic", eta=0.1, gamma=0.1, max_depth=4, min_child_weight=1, subsample=1, colsample_bytree=1)
+xgb_time<-system.time(xgb1 <- xgb.train (params = params, data = dtrain, nrounds = 50, watchlist = list(train=dtrain, val=dtest), print.every.n = 10, early.stop.round = 10, maximize = F , eval_metric = "error"))
+```
+
+```{r}
+cat('The accuracy of xgb model is: ', (1-xgb1$best_score)*100, '% \n')
+cat('The time of training and testing xgb model is: ', xgb_time[1], 's \n')
+```
 
 
 ### Summarize Running Time
