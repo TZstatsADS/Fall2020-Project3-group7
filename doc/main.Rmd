@@ -75,14 +75,15 @@ library(randomForest)
 ### Step 0 set work directories
 ```{r wkdir, eval=FALSE}
 set.seed(2020)
+setwd("~/Documents/GitHub/Fall2020-Project3-group_7/doc")
 #\setwd("~/GitHub/Fall2020-Project3-group_7/doc")
 #setwd("./")
 ```
 
 Provide directories for training images. Training images and Training fiducial points will be in different subfolders. 
 ```{r}
-
-train_dir <- "../data/train_set/" # This will be modified for different data sets.
+train_dir <- "~/Downloads/train_set/"
+#train_dir <- "../data/train_set/" # This will be modified for different data sets.
 train_image_dir <- paste(train_dir, "images/", sep="")
 train_pt_dir <- paste(train_dir,  "points/", sep="")
 train_label_path <- paste(train_dir, "label.csv", sep="") 
@@ -275,7 +276,7 @@ accu_train_GBM_improved <- mean(pred_train_GBM_improved  == dat_train$label)
 cat("The trainig accuracy of model: Improved GBM", "is", accu_train_GBM_improved *100, "%.\n")
 ```
 
-Then, we predicted the test data and evaluated the performance of default GBM model.
+Then, we predicted the test data and evaluated the performance of improved GBM model.
 ```{r test_gbm_impoved, fig.show='hide'}
 ### load models built
 source("../lib/test_GBM.R")
@@ -287,6 +288,25 @@ if(run.test){
 }
 pred_test_GBM_improved = round(test_GBM(fit_train_GBM_improved, dat_test),digit=0)
 accu_test_GBM_improved <- mean(dat_test$label == pred_test_GBM_improved)
+```
+
+Calculate weightedAUC on testing split
+```{r}
+## reweight the test data to represent a balanced label distribution
+label_test <- as.integer(dat_test$label)
+weight_test <- rep(NA, length(label_test))
+for (v in unique(label_test)){
+  weight_test[label_test == v] = 0.5 * length(label_test) / length(label_test[label_test == v])
+}
+
+
+label_pred_GBM_improved<-as.integer(pred_test_GBM_improved )
+accu <- sum(weight_test * (label_pred == label_test)) / sum(weight_test)
+#prob_pred <- lable_pred
+tpr.fpr <- WeightedROC(label_pred_GBM_improved, label_test, weight_test)
+auc_GBM <- WeightedAUC(tpr.fpr)
+
+cat("The AUC of model:  GBM_improved", "is", auc, ".\n")
 cat("The accuracy of model: Improved GBM", "is", accu_test_GBM_improved*100, "%.\n")
 cat("Time for training model GBM_improved = ", tm_train_GBM_improved[1], "s \n")
 cat("Time for testing model GBM_improved = ",tm_test_GBM_improved[1], "s \n")
@@ -329,8 +349,8 @@ cat("The AUC of SVM model is", auc, ".\n")
 ```
 
 #### Step 5.2: Random Forest
-
-```{r Random Forest}
+###### Step 5.2(a): Train RF with with tuning parameters
+```{r train Random Forest }
 source("../lib/rand_f.R")
 
 # tuning random forest
@@ -343,6 +363,11 @@ tm_rfTrain <- system.time(
 )
 save(rf_fit, file = "../output/rf_fit.RData")
 
+```
+
+
+###### Step 5.2(b): Test RF with with tuning parameters
+```{r test Random Forest}
 # testing rf
 tm_rfTest <- system.time(
   rf_test_pred <- rf_test(model = rf_fit,
@@ -361,9 +386,8 @@ cat("The AUC of Random Forest model is", auc, ".\n")
 ```
 
 #### Step 5.3: XGB
-
+###### Step 5.3(a): Construct train matrix and test matrix for XGB model
 ```{r}
-# Construct train matrix and test matrix
 labels <- dat_train$label
 ts_labels <- dat_test$label
 new_tr <- model.matrix(~.+0,data = dat_train[,-which(names(dat_train) %in% c("label"))]) 
@@ -374,19 +398,18 @@ dtrain <- xgb.DMatrix(data = new_tr,label = labels)
 dtest <- xgb.DMatrix(data = new_ts,label=ts_labels)
 ```
 
+
+###### Step 5.3(b): Train XGB with with tuning parameters
 ```{r message=False}
 # train and test model
 params <- list(booster = "gbtree", objective = "binary:logistic", eta=0.1, gamma=0.1, max_depth=4, min_child_weight=1, subsample=1, colsample_bytree=1)
 xgb_time<-system.time(xgb1 <- xgb.train (params = params, data = dtrain, nrounds = 50, watchlist = list(train=dtrain, val=dtest), print.every.n = 10, early.stop.round = 10, maximize = F , eval_metric = "error"))
-```
-
-```{r}
 cat('The accuracy of xgb model is: ', (1-xgb1$best_score)*100, '% \n')
 cat('The time of training and testing xgb model is: ', xgb_time[1], 's \n')
 ```
 
-
-### Summarize Running Time
+### Step 6:Conclusion
+#### Summarize Running Time
 Prediction performance matters, so does the running times for constructing features and for training the model, especially when the computation resource is limited. 
 ```{r running_time}
 
