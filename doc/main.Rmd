@@ -401,22 +401,57 @@ cat("The accuracy of model: Improved GBM", "after reweighting", "is", accu_BGM_i
 #### Step 5.1: SVM
 ###### Step 5.1(a): Train SVM with with tuning parameters
 ```{r SVM}
-source("../lib/svm_model.R")
-svm_train <- function(df){
-  
-  df[, -6007] = scale(df[, -6007])
-  
-  set.seed(2020)
-  return(
-    svm (label~., 
-         data = df,
-         kernel = "radial",
-         type = "C",
-         cost = 1,
-         cross = 3
-    )
-  )
-}
+source("../lib/svm.R")
+# Tune SVM
+set.seed(0)
+opt.svm <- svm_tune(dat_train_balanced_rose[sample(1:nrow(dat_train_balanced_rose), 
+                                                   round(nrow(dat_train_balanced_rose)/4),
+                                                   replace = F), ])
+bestgamma = opt.svm$best.parameters$gamma
+bestcost = opt.svm$best.parameters$cost
+
+# Train SVM
+tm_svm_train <- system.time(
+  svm_fit <- svm_train(dat_train_balanced_rose, bestgamma, bestcost)
+)
+
+tm_svm_test <- system.time(
+  svm_pred <- svm_test(svm_fit, dat_test)
+)
+
+# Calculate Accuracy
+aucc_test_svm = mean(svm_pred == dat_test$label) # unweighted
+accu_svm <- sum(weight_test * (svm_pred == label_test)) / sum(weight_test)
+
+# Calculate ROC AUC
+tpr.fpr <- WeightedROC(as.numeric(svm_pred)-1, label_test, weight_test)
+auc_svm <- WeightedAUC(tpr.fpr)
+
+# OUTPUT
+cat("Time for training model SVM = ", tm_svmTrain[1], "s \n")
+cat("Time for testing model SVM = ",tm_svmTest[1], "s \n")
+cat("The AUC of model after reweighting:  SVM", "is", auc_svm, ".\n")
+cat("The accuracy of model: SVM", "is", aucc_test_svm*100, "%.\n")
+cat("The accuracy of model: SVM", "after reweighting", "is", accu_svm*100, "%.\n")
+
+
+# 
+# 
+# svm_train <- function(df){
+#   
+#   df[, -6007] = scale(df[, -6007])
+#   
+#   set.seed(2020)
+#   return(
+#     svm (label~., 
+#          data = df,
+#          kernel = "radial",
+#          type = "C",
+#          cost = 1,
+#          cross = 3
+#     )
+#   )
+# }
 
 ```
 
@@ -433,21 +468,12 @@ svm_test <- function(model, testdf){
 
 #1. Calculate training and testing time of svm
 #2. testing accuracy 
-cat("Time for training model SVM = ", tm_svmTrain[1], "s \n")
-cat("Time for testing model SVM = ",tm_svmTest[1], "s \n")
+
 ```
 
 Calculate weightedAUC on testing split
 ```{r}
-label_pred_svm<-as.integer(svm_test)
-accu_svm <- sum(weight_test * (label_pred_svm == label_test)) / sum(weight_test)
-#prob_pred <- lable_pred
-tpr.fpr <- WeightedROC(svm_test, label_test, weight_test)
-auc_svm <- WeightedAUC(tpr.fpr)
 
-cat("The AUC of model after reweighting:  SVM", "is", auc_svm, ".\n")
-cat("The accuracy of model: SVM", "is", aucc_test_svm*100, "%.\n")
-cat("The accuracy of model: XGB", "after reweighting", "is", accu_svm*100, "%.\n")
 
 ```
 
