@@ -8,6 +8,7 @@ Term: Fall 2020
 
 + Team ##07
 + Team members
+
 	Depeng Kong(dk3112)  
 	Xinying Feng(xf2208)  
 	Xinyuan Peng(xp2177)  
@@ -20,9 +21,9 @@ Term: Fall 2020
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members approve our work presented in this GitHub repository including this contributions statement. 
 + Depeng Kong built Random Forest and SVM Model to improve the overall performance of predictions through Cross-validation and tuning parameters. 
 
-+ Peng Xinyuan built GBM Model to improve prediction performance through Cross-validation and tuning parameters. She also contributed on improving the performance SVM Model. Construct initial skeleton of main.RMD file.   She also helped debug across different models. 
++ Xinyuan Peng built GBM Model to improve prediction performance through Cross-validation and tuning parameters. She also contributed on improving the performance SVM Model. Construct initial skeleton of main.RMD file.   She also helped debug across different models. 
 
-+ Duan Siyu rebalanced training data using different methods, and rebalanced testing data to calculate AUC and accuracy for all models. She also contributed on tuning parameters of GBM model. She integrated all the codes into main, tidied the file, and created tables and plots to summarize performance of all models.   
++ Siyu Duan rebalanced training data using different methods, and rebalanced testing data to calculate AUC and accuracy for all models. She also contributed on tuning parameters of GBM model. She integrated all the codes into main to make sure all codes run smoothly, tidied the file, and created tables and plots to summarize performance of all models.   
 
 + Natalie Williams wrote initial skeleton code of SVM model.  She prepared a verbal script for presentation, and was the presentor of our group. 
 
