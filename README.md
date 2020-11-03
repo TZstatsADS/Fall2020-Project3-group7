@@ -23,7 +23,7 @@ Term: Fall 2020
 + Peng Xinyuan responsibe for GBM baseline and improve model. She also contributed to SVM model.  
 + Duan Siyu responsible for feature extraction, rebalance data and all the data prepocess work. She also responsible for summarize all our code and run it.  
 + Natalie Williams is the presenter. She responsible for presentation and also contribute to SVM model.  
-+ Feng Xinying responsible for Xgboost model.  
++ Feng Xinying responsible for Xgboost model and readme in github.  
 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
