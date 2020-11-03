@@ -535,8 +535,8 @@ cat("The accuracy of model: Random Forest", "after reweighting", "is", accu_rf*1
 ```{r XGB}
 labels <- dat_train$label
 ts_labels <- dat_test$label
-new_tr <- model.matrix(~.+0,data = dat_train[,-which(names(dat_train) %in% c("label"))]) 
-new_ts <- model.matrix(~.+0,data = dat_test[,-which(names(dat_test) %in% c("label"))])
+new_tr <- model.matrix(~.+0,data = dat_train_balanced_rose[,-which(names(dat_train_balanced_rose) %in% c("label"))]) 
+new_ts <- model.matrix(~.+0,data = dat_train_balanced_rose[,-which(names(dat_train_balanced_rose) %in% c("label"))])
 #labels <- as.numeric(labels)-1
 ts_labels <- as.numeric(ts_labels)-1
 dtrain <- xgb.DMatrix(data = new_tr,label = labels) 
@@ -547,7 +547,7 @@ dtest <- xgb.DMatrix(data = new_ts,label=ts_labels)
 ###### Step 5.3(b): Train XGB with with tuning parameters
 ```{r message=False}
 xgb_train_time=NA
-xgb_train_time<-system.time(xgb1 <- xgboost (data = dtrain, booster = "gbtree", objective = "binary:logistic", eta=0.1, gamma=0.1, max_depth=4, min_child_weight=1, subsample=1, colsample_bytree=1, nrounds = 50))
+xgb_train_time<-system.time(xgb1 <- xgboost (data = dtrain, booster = "gbtree", objective = "binary:logistic", eta=0.5, gamma=0.1, max_depth=4, min_child_weight=1, subsample=1, colsample_bytree=1, nrounds = 5))
 ```
 ```{r}
 
@@ -568,7 +568,7 @@ cat('The time of testing xgb model is: ', xgb_test_time[1], 's \n')
 
 Calculate weightedAUC on testing split
 ```{r}
-label_pred_xgb<-as.integer(xgb_pred)
+label_pred_xgb<-as.integer(round(xgb_pred))
 accu_xgb <- sum(weight_test * (label_pred_xgb == label_test)) / sum(weight_test)
 #prob_pred <- lable_pred
 tpr.fpr <- WeightedROC(xgb_pred, label_test, weight_test)
