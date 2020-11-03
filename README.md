@@ -23,7 +23,7 @@ Term: Fall 2020
 
 + Xinyuan Peng built GBM Model to improve prediction performance through Cross-validation and tuning parameters. She also contributed on improving the performance SVM Model. Construct initial skeleton of main.RMD file.   She also helped debug across different models. 
 
-+ Siyu Duan rebalanced training data using different methods, and rebalanced testing data to calculate AUC and accuracy for all models. She also contributed on tuning parameters of GBM model. She integrated all the codes into main to make sure all codes run smoothly, tidied the file, and created tables and plots to summarize performance of all models.   
++ Siyu Duan rebalanced training data using different methods, and rebalanced testing data to calculate AUC and accuracy for all models. She also contributed on tuning parameters of GBM model. She integrated all the codes into main to make sure all codes run smoothly, tidied the file, and created tables  to summarize performance of all models.   
 
 + Natalie Williams wrote initial skeleton code of SVM model.  She prepared a verbal script for presentation, and was the presentor of our group. 
 
