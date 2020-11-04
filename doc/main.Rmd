@@ -439,8 +439,6 @@ auc_rf <- WeightedAUC(tpr.fpr)
 
 
 ###### Step 5.2(c): Summary of RF
-#Since RF took too long to train, the following is the screenshot of result using tunning parameter
-![Figure3](../figs/RF_result.jpeg)
 ```{r}
 cat("The AUC of model after reweighting:  RF", "is", auc_rf, ".\n")
 cat("The accuracy of model: Random Forest on imbalanced testing data", "is", accu_rf_test *100, "%.\n")
@@ -576,7 +574,6 @@ auc
 ```
 
 Summary table
-![Figure4](../figs/model_summary.jpg)
 ```{r, summary table}
 Table<-running_time%>%
   full_join(Accuracy_balanced, by="model")%>%
@@ -589,7 +586,6 @@ save(Table, file = "../output/summary_table.RData")
 
 
 ###### Step 6.4：Base line and Final advanced model comparision 
-![Figure5](../figs/comparision.jpg)
 ```{r}
 cat("Time for training feature extraction = ", tm_feature_train[1], "s \n")
 cat("Time for testing feature extraction = ",tm_feature_test[1], "s \n")
