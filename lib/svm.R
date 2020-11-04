@@ -21,7 +21,7 @@ svm_tune <- function(df){
 svm_train <- function(df, opt.gamma, opt.cost){
   set.seed(0)
   return(
-    svm (factor(df$label) ~ .,
+    svm (df$label ~ .,
          data = df,
          gamma = opt.gamma,
          cost = opt.cost,
