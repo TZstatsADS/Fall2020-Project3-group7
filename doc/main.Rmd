@@ -379,7 +379,7 @@ aucc_test_svm = mean(svm_pred == dat_test$label) # unweighted
 accu_svm <- sum(weight_test * (svm_pred == label_test)) / sum(weight_test)
 
 # Calculate ROC AUC
-tpr.fpr <- WeightedROC(as.numeric(svm_pred)-1, label_test, weight_test)
+tpr.fpr <- WeightedROC(svm_pred, label_test, weight_test)
 auc_svm <- WeightedAUC(tpr.fpr)
 ```
 
@@ -432,7 +432,7 @@ Calculate weightedAUC on testing split
 label_pred_rf<-as.integer(rf_test_pred)
 accu_rf <- sum(weight_test * (label_pred_rf == label_test)) / sum(weight_test)
 #prob_pred <- lable_pred
-tpr.fpr <- WeightedROC(prob_pred_GBM_improved, label_test, weight_test)
+tpr.fpr <- WeightedROC(rf_test_pred, label_test, weight_test)
 auc_rf <- WeightedAUC(tpr.fpr)
 
 ```
@@ -523,9 +523,7 @@ feature_time<-tibble(
 save(feature_time, file = "../output/feature_extraction_time.RData")
 
 #training time for RF: 
-tm_rfTrain[1] <- 8694.217
 #Testing time for RF : 
-tm_rfTest[1]<-  0.62
 running_time<-tribble(
   ~model, ~training_time, ~testing_time,
   "GBM baseline", tm_train_GBM_base[1], tm_test_GBM_base[1],
@@ -540,8 +538,6 @@ running_time<-tribble(
 
 ###### Step 6.2：Summarize Accuracy on imbalanced and balanced testing split 
 ```{r}
-accu_rf_test<-77
-accu_rf<-49.35897
 Accuracy_imbalanced<-tribble(
   ~model, ~accuracy_imbalanced,
   "GBM baseline", accu_test_GBM_base*100,
@@ -566,7 +562,6 @@ Accuracy_balanced
 
 ###### Step 6.3：Summarize AUC for on balanced testing split 
 ```{r}
-auc_rf <-0.5264747
 auc<-tribble(
   ~model, ~auc_testing_set,
   "GBM baseline", auc_GBM_base,
