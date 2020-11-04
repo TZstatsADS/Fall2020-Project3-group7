@@ -375,8 +375,8 @@ if(run.test){
 }
 
 # Calculate Accuracy
-aucc_test_svm = mean(svm_pred == dat_test$label) # unweighted
-accu_svm <- sum(weight_test * (svm_pred == label_test)) / sum(weight_test)
+aucc_test_svm = mean(round(svm_pred) == dat_test$label) # unweighted
+accu_svm <- sum(weight_test * (round(svm_pred) == label_test)) / sum(weight_test)
 
 # Calculate ROC AUC
 tpr.fpr <- WeightedROC(svm_pred, label_test, weight_test)
