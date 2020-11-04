@@ -354,7 +354,7 @@ set.seed(2020)
 
 # Train SVM
 tm_svm_train <- system.time(
-  svm_fit <- svm (factor(dat_train_balanced_rose$label) ~ .,
+  svm_fit <- svm (dat_train_balanced_rose$label ~ .,
          data = dat_train_balanced_rose,
          gamma = 0.001,
          cost = 0.021,
