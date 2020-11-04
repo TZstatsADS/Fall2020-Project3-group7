@@ -15,7 +15,8 @@ Term: Fall 2020
 	Siyu Duan(sd3329)  
 	Natalie Williams(naw2127)  
 
-+ Project summary: In this project, we created a classification engine for facial emotion recognition. We first extract feature and try different methods to rebalance our data. Then we split the dataset into train set and test set. After that, we use train dataset with different rebalance methods to built GBM, Logistic regression, Random forest, Xgboost and SVM model to make prediction. For each training model, we use gridsearch to tune for best parameters. After obtain the best parameters, we use test dataset to make prediction and obtain the final result. We choose rose to rebalance our data according to the final result. The final result is as follow:
++ Project summary:
+The goal of this project is efficiently and accurately classifying images by facial emotions. We took the parwise distance between fiducial points as our features for facial emotion recognition.  To deal with the imbalanced data problem, we re balanced training data using Bootstrap Random Over-Sampling Examples Technique(ROSE) after training and testing split. Our beaseline model is GBM using default parameters.  Improved GBM, Random Forest, Xgboost and SVM were built to improve the efficiency and accuracy of predictions through parameter tuning. Cross-validation is used in training all models.  To evaluate the performances of our model,  we rebalanced our testing data, and then using balanced testing data to calculate accuracy, weightedROC, weightedAUC of our models as part of our evaluation metrics for choosing the final model.   Also, training time and testing time included in the evaluation metrics.  Our final model is SVM, compared to basedline GBM, the AUC increased around 0.2, and prediction accuracy improved around 25%.  
 
 	
 **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members approve our work presented in this GitHub repository including this contributions statement. 
@@ -27,7 +28,7 @@ Term: Fall 2020
 
 + Natalie Williams wrote initial skeleton code of SVM model.  She prepared a verbal script for presentation, and was the presentor of our group. 
 
-+ Xinying Feng  built XGB Model to improve prediction performance through Cross-validation and tuning parameters, and REEADME in github.  
++ Xinying Feng built XGB Model to improve prediction performance through Cross-validation and tuning parameters, and README in github.  
 
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
