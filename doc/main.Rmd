@@ -424,12 +424,12 @@ if(run.test){
 }
 
 
-accu_rf_test <- mean(rf_test_pred == dat_test$label)
+accu_rf_test <- mean(round(rf_test_pred) == dat_test$label)
 ```
 
 Calculate weightedAUC on testing split
 ```{r}
-label_pred_rf<-as.integer(rf_test_pred)
+label_pred_rf<-round(rf_test_pred)
 accu_rf <- sum(weight_test * (label_pred_rf == label_test)) / sum(weight_test)
 #prob_pred <- lable_pred
 tpr.fpr <- WeightedROC(rf_test_pred, label_test, weight_test)
