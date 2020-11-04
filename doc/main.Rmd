@@ -235,7 +235,7 @@ The defalut parameters are:
 + cv. fold = 3
 
 ```{r train_GBM_base}
-# load model built-in from ib
+# load model built-in from lib
 source("../lib/train_GBM_base.R") 
 
 # fit train data
@@ -357,7 +357,7 @@ tm_svm_train <- system.time(
   svm_fit <- svm (factor(dat_train_balanced_rose$label) ~ .,
          data = dat_train_balanced_rose,
          gamma = 0.001,
-         cost = 0.001,
+         cost = 0.021,
          kernel = "linear",
          cross = 10
     )
@@ -404,7 +404,7 @@ source("../lib/rand_f.R")
 # ntree=1000,  nodesize=25, samplesize=nrow(trainx)
 tm_rfTrain <- system.time(
   rf_fit <- rf_train(dat_train_balanced_rose,
-                     mtry = 2002)
+                     mtry = 77)
 )
 save(rf_fit, file = "../output/train_rf.RData")
 
