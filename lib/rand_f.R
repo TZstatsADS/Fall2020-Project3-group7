@@ -17,7 +17,7 @@ rf_tune <- function(df){
 
 rf_train <- function(df, mtry){
   trainx = as.matrix(df[, -6007])
-  trainy = factor(df[, 6007])
+  trainy = df[, 6007]
   set.seed(0)
   return(
     randomForest(x = trainx,
